@@ -7,7 +7,7 @@ export const createPropertySchema = z.object({
     ownerId: z.string({ required_error: 'Owner ID is required' }).uuid('Invalid Owner ID format'),
     managerId: z.string().uuid('Invalid Manager ID format').optional().nullable(),
     size: z.string().trim().optional().nullable(),
-    layoutImage: z.string().url('Invalid image URL').optional().nullable().or(z.literal('')),
+    // layoutImage is handled by multer file upload, not JSON body
     floor: z.coerce.number().int('Floor must be a whole number').optional().nullable(),
     googleLocation: z.string().url('Invalid Google Maps URL').optional().nullable().or(z.literal('')),
     meterNo: z.string().trim().optional().nullable(),
@@ -23,7 +23,7 @@ export const updatePropertySchema = z.object({
     managerId: z.string().uuid('Invalid Manager ID format').optional().nullable(),
     isActive: z.boolean().optional(),
     size: z.string().trim().optional().nullable(),
-    layoutImage: z.string().url('Invalid image URL').optional().nullable().or(z.literal('')),
+    // layoutImage is handled by multer file upload, not JSON body
     floor: z.coerce.number().int('Floor must be a whole number').optional().nullable(),
     googleLocation: z.string().url('Invalid Google Maps URL').optional().nullable().or(z.literal('')),
     meterNo: z.string().trim().optional().nullable(),

@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { toast } from 'sonner';
@@ -37,14 +37,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PlusCircle, MapPin, Gauge } from 'lucide-react';
+import { PlusCircle, MapPin, Gauge, ImageIcon } from 'lucide-react';
 
 const propertySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   address: z.string().min(5, 'Address is too short'),
   managerId: z.string().optional(),
   size: z.string().optional(),
-  layoutImage: z.string().optional(),
   floor: z.coerce.number().int().optional().or(z.literal('')),
   googleLocation: z.string().optional(),
   meterNo: z.string().optional(),
@@ -61,12 +60,14 @@ export default function PropertiesPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       name: '', address: '', managerId: '',
-      size: '', layoutImage: '', floor: '' as any,
+      size: '', floor: '' as any,
       googleLocation: '', meterNo: '',
       rentIncrement: '' as any, rentIncrementType: '',
     },
@@ -131,26 +132,32 @@ export default function PropertiesPage() {
     }
     setIsSubmitting(true);
     try {
-      const payload: any = {
-        name: data.name,
-        address: data.address,
-        ownerId: user.id,
-        ...(data.managerId && data.managerId !== 'none' ? { managerId: data.managerId } : {}),
-      };
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('address', data.address);
+      formData.append('ownerId', user.id);
 
-      // Add optional fields only if they have values
-      if (data.size) payload.size = data.size;
-      if (data.layoutImage) payload.layoutImage = data.layoutImage;
-      if (data.floor !== '' && data.floor !== undefined) payload.floor = Number(data.floor);
-      if (data.googleLocation) payload.googleLocation = data.googleLocation;
-      if (data.meterNo) payload.meterNo = data.meterNo;
-      if (data.rentIncrement !== '' && data.rentIncrement !== undefined) payload.rentIncrement = Number(data.rentIncrement);
-      if (data.rentIncrementType && data.rentIncrementType !== 'none') payload.rentIncrementType = data.rentIncrementType;
+      if (data.managerId && data.managerId !== 'none') formData.append('managerId', data.managerId);
+      if (data.size) formData.append('size', data.size);
+      if (data.floor !== '' && data.floor !== undefined) formData.append('floor', String(data.floor));
+      if (data.googleLocation) formData.append('googleLocation', data.googleLocation);
+      if (data.meterNo) formData.append('meterNo', data.meterNo);
+      if (data.rentIncrement !== '' && data.rentIncrement !== undefined) formData.append('rentIncrement', String(data.rentIncrement));
+      if (data.rentIncrementType && data.rentIncrementType !== 'none') formData.append('rentIncrementType', data.rentIncrementType);
 
-      await api.post('/properties', payload);
+      // Attach image file if selected
+      if (imageFile) {
+        formData.append('layoutImage', imageFile);
+      }
+
+      await api.post('/properties', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       toast.success('Property created successfully');
       setIsDialogOpen(false);
       form.reset();
+      setImageFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       fetchData(true);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create property');
@@ -316,18 +323,22 @@ export default function PropertiesPage() {
                     )}
                   />
 
-                  {/* Row 6: Layout Image URL */}
-                  <FormField
-                    control={form.control as any}
-                    name="layoutImage"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Layout Image URL (Optional)</FormLabel>
-                        <FormControl><Input placeholder="https://example.com/layout.png" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
+                  {/* Row 6: Layout Image Upload */}
+                  <div>
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Layout Image (Optional)
+                    </label>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="mt-2 block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:opacity-90 cursor-pointer"
+                      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    />
+                    {imageFile && (
+                      <p className="text-xs text-muted-foreground mt-1">Selected: {imageFile.name}</p>
                     )}
-                  />
+                  </div>
 
                   <div className="flex justify-end pt-4">
                     <Button type="submit" disabled={isSubmitting}>
@@ -354,6 +365,7 @@ export default function PropertiesPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Image</TableHead>
                     <TableHead>Property Name</TableHead>
                     <TableHead>Address</TableHead>
                     <TableHead>Size</TableHead>
@@ -368,10 +380,25 @@ export default function PropertiesPage() {
                 </TableHeader>
                 <TableBody>
                   {properties.length === 0 ? (
-                    <TableRow><TableCell colSpan={10} className="text-center">No properties found</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={11} className="text-center">No properties found</TableCell></TableRow>
                   ) : (
                     properties.map((p) => (
                       <TableRow key={p.id}>
+                        <TableCell>
+                          {p.layoutImage ? (
+                            <a href={p.layoutImage} target="_blank" rel="noopener noreferrer">
+                              <img
+                                src={p.layoutImage}
+                                alt={`${p.name} layout`}
+                                className="h-10 w-10 rounded object-cover border hover:opacity-80 transition-opacity"
+                              />
+                            </a>
+                          ) : (
+                            <div className="h-10 w-10 rounded border flex items-center justify-center bg-muted">
+                              <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{p.name}</TableCell>
                         <TableCell>{p.address}</TableCell>
                         <TableCell>{p.size || '—'}</TableCell>
