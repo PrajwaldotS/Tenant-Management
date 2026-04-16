@@ -70,10 +70,22 @@ export default function UsersPage() {
     defaultValues: { name: '', email: '', password: '', role: 'MANAGER' },
   });
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (forceReload = false) => {
     try {
+      if (!forceReload) {
+        const cached = sessionStorage.getItem('users_data');
+        if (cached) {
+          setUsers(JSON.parse(cached));
+          setLoading(false);
+          return;
+        }
+      }
+
       const res = await api.get('/users');
-      if (res.data.success) setUsers(res.data.data);
+      if (res.data.success) {
+        setUsers(res.data.data);
+        sessionStorage.setItem('users_data', JSON.stringify(res.data.data));
+      }
     } catch (error: any) {
       toast.error('Failed to load users');
     } finally {
@@ -87,6 +99,16 @@ export default function UsersPage() {
     } else {
       setLoading(false); // Non-admins shouldn't be here, but we fail gracefully
     }
+
+    const handleReload = () => {
+      if (user && user.role === 'ADMIN') {
+        setLoading(true);
+        fetchUsers(true);
+      }
+    };
+
+    window.addEventListener('dashboard-reload', handleReload);
+    return () => window.removeEventListener('dashboard-reload', handleReload);
   }, [user]);
 
   const onSubmit = async (data: UserFormValues) => {
@@ -96,7 +118,7 @@ export default function UsersPage() {
       toast.success('User created successfully');
       setIsDialogOpen(false);
       form.reset();
-      fetchUsers();
+      fetchUsers(true);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create user');
     } finally {

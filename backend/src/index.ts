@@ -52,7 +52,7 @@ const shutdown = async (signal: string) => {
     console.log('✓ Database disconnected');
     process.exit(0);
   });
-
+ 
   // Force exit if graceful shutdown takes too long
   setTimeout(() => {
     console.error('Forced shutdown after timeout');

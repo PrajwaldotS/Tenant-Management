@@ -63,14 +63,31 @@ export default function PaymentsPage() {
 
   const selectedTenantId = form.watch('tenantId');
 
-  const fetchData = async () => {
+  const fetchData = async (forceReload = false) => {
     try {
+      if (!forceReload) {
+        const cachedPayments = sessionStorage.getItem('payments_data');
+        const cachedTenants = sessionStorage.getItem('payments_tenants_data');
+        if (cachedPayments) {
+          setPayments(JSON.parse(cachedPayments));
+          if (cachedTenants) setTenants(JSON.parse(cachedTenants));
+          setLoading(false);
+          return;
+        }
+      }
+
       const [paymentsRes, tenantsRes] = await Promise.all([
         api.get('/payments'),
         api.get('/tenants')
       ]);
-      if (paymentsRes.data.success) setPayments(paymentsRes.data.data);
-      if (tenantsRes.data.success) setTenants(tenantsRes.data.data);
+      if (paymentsRes.data.success) {
+        setPayments(paymentsRes.data.data);
+        sessionStorage.setItem('payments_data', JSON.stringify(paymentsRes.data.data));
+      }
+      if (tenantsRes.data.success) {
+        setTenants(tenantsRes.data.data);
+        sessionStorage.setItem('payments_tenants_data', JSON.stringify(tenantsRes.data.data));
+      }
     } catch (error: any) {
       toast.error('Failed to load payment data');
     } finally {
@@ -80,6 +97,14 @@ export default function PaymentsPage() {
 
   useEffect(() => {
     fetchData();
+
+    const handleReload = () => {
+      setLoading(true);
+      fetchData(true);
+    };
+
+    window.addEventListener('dashboard-reload', handleReload);
+    return () => window.removeEventListener('dashboard-reload', handleReload);
   }, []);
 
   // Fetch rents when tenant changes
@@ -111,7 +136,7 @@ export default function PaymentsPage() {
       toast.success('Payment recorded successfully');
       setIsDialogOpen(false);
       form.reset();
-      fetchData();
+      fetchData(true);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to record payment');
     } finally {

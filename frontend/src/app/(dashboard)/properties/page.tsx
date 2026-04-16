@@ -72,19 +72,32 @@ export default function PropertiesPage() {
     },
   });
 
-  const fetchData = async () => {
+  const fetchData = async (forceReload = false) => {
     try {
+      if (!forceReload) {
+        const cachedProp = sessionStorage.getItem('properties_data');
+        const cachedManagers = sessionStorage.getItem('managers_data');
+        if (cachedProp) {
+          setProperties(JSON.parse(cachedProp));
+          if (cachedManagers) setManagers(JSON.parse(cachedManagers));
+          setLoading(false);
+          return;
+        }
+      }
+
       const [propRes, userRes] = await Promise.all([
         api.get('/properties'),
         user?.role === 'ADMIN' ? api.get('/users?limit=100') : Promise.resolve(null)
       ]);
       if (propRes.data.success) {
          setProperties(propRes.data.data);
+         sessionStorage.setItem('properties_data', JSON.stringify(propRes.data.data));
       }
       if (userRes && userRes.data.success) {
         // Filter users who can be managers
         const possibleManagers = userRes.data.data.filter((u: any) => u.isActive && (u.role === 'MANAGER' || u.role === 'ADMIN'));
         setManagers(possibleManagers);
+        sessionStorage.setItem('managers_data', JSON.stringify(possibleManagers));
       }
     } catch (error: any) {
       toast.error('Failed to load properties');
@@ -99,6 +112,16 @@ export default function PropertiesPage() {
     } else {
       setLoading(false);
     }
+
+    const handleReload = () => {
+      if (user && ['ADMIN', 'MANAGER'].includes(user.role)) {
+        setLoading(true);
+        fetchData(true);
+      }
+    };
+
+    window.addEventListener('dashboard-reload', handleReload);
+    return () => window.removeEventListener('dashboard-reload', handleReload);
   }, [user]);
 
   const onSubmit = async (data: PropertyFormValues) => {
@@ -128,7 +151,7 @@ export default function PropertiesPage() {
       toast.success('Property created successfully');
       setIsDialogOpen(false);
       form.reset();
-      fetchData();
+      fetchData(true);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create property');
     } finally {

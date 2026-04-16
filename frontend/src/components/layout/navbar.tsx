@@ -3,7 +3,7 @@
 import { useAuthStore } from '@/store/auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Menu } from 'lucide-react';
+import { Menu, RefreshCw } from 'lucide-react';
 import { Sidebar } from './sidebar';
 
 export function Navbar() {
@@ -22,6 +22,20 @@ export function Navbar() {
       </Sheet>
       
       <div className="flex items-center gap-4">
+        {user && (
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2 h-8 hidden sm:flex"
+            onClick={() => {
+              sessionStorage.clear();
+              window.dispatchEvent(new Event('dashboard-reload'));
+            }}
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Reload Data
+          </Button>
+        )}
         <div className="text-sm font-medium">
           {user ? (
             <div className="flex items-center gap-2">

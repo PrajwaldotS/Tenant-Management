@@ -62,17 +62,30 @@ export default function TenantsPage() {
     defaultValues: { name: '', phone: '', rentAmount: 0, propertyId: '', moveInDate: '' },
   });
 
-  const fetchData = async () => {
+  const fetchData = async (forceReload = false) => {
     try {
+      if (!forceReload) {
+        const cachedTenants = sessionStorage.getItem('tenants_data');
+        const cachedProps = sessionStorage.getItem('tenants_properties_data');
+        if (cachedTenants) {
+          setTenants(JSON.parse(cachedTenants));
+          if (cachedProps) setProperties(JSON.parse(cachedProps));
+          setLoading(false);
+          return;
+        }
+      }
+
       const [tenantsRes, propsRes] = await Promise.all([
         api.get('/tenants'),
         ['ADMIN', 'MANAGER'].includes(user?.role || '') ? api.get('/properties') : Promise.resolve(null)
       ]);
       if (tenantsRes.data.success) {
          setTenants(tenantsRes.data.data);
+         sessionStorage.setItem('tenants_data', JSON.stringify(tenantsRes.data.data));
       }
       if (propsRes && propsRes.data.success) {
          setProperties(propsRes.data.data);
+         sessionStorage.setItem('tenants_properties_data', JSON.stringify(propsRes.data.data));
       }
     } catch (error: any) {
       toast.error('Failed to load tenants data');
@@ -82,7 +95,19 @@ export default function TenantsPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    if (user) {
+      fetchData();
+    }
+    
+    const handleReload = () => {
+      if (user) {
+        setLoading(true);
+        fetchData(true);
+      }
+    };
+
+    window.addEventListener('dashboard-reload', handleReload);
+    return () => window.removeEventListener('dashboard-reload', handleReload);
   }, [user]);
 
   const onSubmit = async (data: TenantFormValues) => {
@@ -94,7 +119,7 @@ export default function TenantsPage() {
       toast.success('Tenant added successfully');
       setIsDialogOpen(false);
       form.reset();
-      fetchData();
+      fetchData(true);
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to add tenant');
     } finally {

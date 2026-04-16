@@ -48,11 +48,21 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function fetchStats(forceReload = false) {
       try {
+        if (!forceReload) {
+          const cachedStats = sessionStorage.getItem('dashboard_stats_data');
+          if (cachedStats) {
+            setStats(JSON.parse(cachedStats));
+            setLoading(false);
+            return;
+          }
+        }
+
         const response = await api.get('/reports/stats');
         if (response.data.success) {
           setStats(response.data.data);
+          sessionStorage.setItem('dashboard_stats_data', JSON.stringify(response.data.data));
         }
       } catch (error: any) {
          if (error.response?.status !== 403) {
@@ -68,6 +78,16 @@ export default function DashboardPage() {
     } else {
       setLoading(false);
     }
+
+    const handleReload = () => {
+      if (user && ['ADMIN', 'MANAGER'].includes(user.role)) {
+        setLoading(true);
+        fetchStats(true);
+      }
+    };
+
+    window.addEventListener('dashboard-reload', handleReload);
+    return () => window.removeEventListener('dashboard-reload', handleReload);
   }, [user]);
 
   if (loading) {
