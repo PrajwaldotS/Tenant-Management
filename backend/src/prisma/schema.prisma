@@ -26,6 +26,11 @@ enum PaymentMethod {
   BANK
 }
 
+enum RentIncrementType {
+  PERCENTAGE
+  AMOUNT
+}
+
 model User {
   id           String    @id @default(uuid())
   name         String
@@ -52,6 +57,15 @@ model Property {
   name      String
   address   String
   isActive  Boolean  @default(true)
+
+  // Property details
+  size              String?             // e.g. "1200 sq ft"
+  layoutImage       String?             // URL to layout image
+  floor             Int?
+  googleLocation    String?             // Google Maps URL
+  meterNo           String?             // Utility meter number
+  rentIncrement     Decimal?   @db.Decimal(10, 2)
+  rentIncrementType RentIncrementType?  // PERCENTAGE or AMOUNT
   
   // Relations
   ownerId   String

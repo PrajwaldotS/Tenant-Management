@@ -58,6 +58,12 @@ async function main() {
       address: '123 Main Street, Block A',
       ownerId: admin.id,
       managerId: manager.id,
+      size: '2400 sq ft',
+      floor: 3,
+      meterNo: 'MTR-00452',
+      googleLocation: 'https://maps.google.com/?q=19.076,72.8777',
+      rentIncrement: 5,
+      rentIncrementType: 'PERCENTAGE',
     },
   });
   console.log(`  ✓ Property: ${property.name}`);

@@ -7,6 +7,13 @@ interface CreatePropertyInput {
   address: string;
   ownerId: string;
   managerId?: string | null;
+  size?: string | null;
+  layoutImage?: string | null;
+  floor?: number | null;
+  googleLocation?: string | null;
+  meterNo?: string | null;
+  rentIncrement?: number | null;
+  rentIncrementType?: 'PERCENTAGE' | 'AMOUNT' | null;
 }
 
 interface UpdatePropertyInput {
@@ -14,6 +21,13 @@ interface UpdatePropertyInput {
   address?: string;
   managerId?: string | null;
   isActive?: boolean;
+  size?: string | null;
+  layoutImage?: string | null;
+  floor?: number | null;
+  googleLocation?: string | null;
+  meterNo?: string | null;
+  rentIncrement?: number | null;
+  rentIncrementType?: 'PERCENTAGE' | 'AMOUNT' | null;
 }
 
 const PROPERTY_INCLUDE = {
@@ -52,6 +66,13 @@ export const createProperty = async (data: CreatePropertyInput) => {
       address: data.address,
       ownerId: data.ownerId,
       managerId: data.managerId || null,
+      size: data.size || null,
+      layoutImage: data.layoutImage || null,
+      floor: data.floor ?? null,
+      googleLocation: data.googleLocation || null,
+      meterNo: data.meterNo || null,
+      rentIncrement: data.rentIncrement ?? null,
+      rentIncrementType: data.rentIncrementType || null,
     },
     include: PROPERTY_INCLUDE,
   });
