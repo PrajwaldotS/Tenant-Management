@@ -276,7 +276,7 @@ export default function TenantsPage() {
                   <TableHead>Tenant Name</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Property</TableHead>
-                  <TableHead>Rent Amount</TableHead>
+                  <TableHead className="text-right">Rent Amount</TableHead>
                   <TableHead>Move-in Date</TableHead>
                 </TableRow>
               </TableHeader>
@@ -295,11 +295,34 @@ export default function TenantsPage() {
 
                   return filteredTenants.map((t) => (
                     <TableRow key={t.id}>
-                      <TableCell className="font-medium">{t.name}</TableCell>
-                      <TableCell>{t.phone}</TableCell>
-                      <TableCell>{t.property?.buildingName ? `${t.property.buildingName} › ${t.property.unitName}` : (t.property?.unitName || 'Unknown')}</TableCell>
-                      <TableCell>₹{Number(t.rentAmount).toLocaleString()}</TableCell>
-                      <TableCell>{new Date(t.moveInDate).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase shadow-sm">
+                            {t.name.charAt(0)}
+                          </div>
+                          <span className="font-bold text-slate-800 dark:text-slate-100 tracking-tight text-base">{t.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-mono text-sm border border-slate-200 dark:border-slate-800 rounded">
+                          {t.phone}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center px-3 py-1.5 rounded text-sm font-semibold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                           {t.property?.buildingName ? `${t.property.buildingName} › ${t.property.unitName}` : (t.property?.unitName || 'Unknown')}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg text-base font-bold border border-emerald-100 dark:border-emerald-500/20">
+                          ₹{Number(t.rentAmount).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                         <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 font-mono text-sm border border-slate-200 dark:border-slate-800 rounded">
+                           {new Date(t.moveInDate).toLocaleDateString()}
+                         </span>
+                      </TableCell>
                     </TableRow>
                   ));
                 })()}

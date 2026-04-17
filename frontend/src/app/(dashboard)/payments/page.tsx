@@ -337,13 +337,35 @@ export default function PaymentsPage() {
                 ) : (
                   payments.map((p) => (
                     <TableRow key={p.id}>
-                      <TableCell className="font-medium">{p.tenant?.name || 'Unknown'}</TableCell>
-                      <TableCell>{p.rent?.generatedMonth}</TableCell>
-                      <TableCell>{new Date(p.paymentDate).toLocaleDateString()}</TableCell>
-                      <TableCell>{p.method}</TableCell>
-                      <TableCell>{p.referenceId || '-'}</TableCell>
-                      <TableCell className="text-right font-medium text-emerald-600">
-                        ₹{Number(p.amount).toLocaleString()}
+                      <TableCell>
+                        <span className="font-semibold text-slate-900 dark:text-slate-100 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded text-sm border border-slate-200 dark:border-slate-700">
+                          {p.tenant?.name || 'Unknown'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded text-sm font-medium border border-blue-100 dark:border-blue-800">
+                          {p.rent?.generatedMonth}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 rounded text-sm font-medium border border-violet-100 dark:border-violet-800">
+                          {new Date(p.paymentDate).toLocaleDateString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs sm:text-sm font-bold uppercase tracking-wider border ${p.method === 'CASH' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20' : p.method === 'UPI' ? 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20' : 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'}`}>
+                          {p.method}
+                        </span>
+                      </TableCell>
+                      <TableCell className="font-mono text-base">
+                        <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 rounded text-xs border border-slate-200 dark:border-slate-800">
+                          {p.referenceId || '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <span className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg text-base font-bold border border-emerald-100 dark:border-emerald-500/20">
+                          ₹{Number(p.amount).toLocaleString()}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button size="sm" variant="ghost" onClick={() => setPrintPayment(p)}>

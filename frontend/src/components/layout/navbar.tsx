@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu, RefreshCw } from 'lucide-react';
 import { Sidebar } from './sidebar';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export function Navbar() {
   const { user } = useAuthStore();
@@ -22,6 +23,7 @@ export function Navbar() {
       </Sheet>
       
       <div className="flex items-center gap-4">
+        <ThemeToggle />
         {user && (
           <Button 
             variant="outline" 

@@ -231,10 +231,12 @@ export default function PropertiesPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold tracking-tight">Properties</h2>
         
-        {user?.role === 'ADMIN' && (
+        {['ADMIN', 'MANAGER'].includes(user?.role || '') && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger render={<Button className="gap-2" />}>
-                <PlusCircle className="h-4 w-4" /> Add Property
+               <span className="flex items-center gap-2">
+                 <PlusCircle className="h-4 w-4" /> Add Property
+               </span>
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
@@ -522,20 +524,38 @@ export default function PropertiesPage() {
                   ) : (
                     filteredProperties.map((p) => (
                       <TableRow key={p.id}>
-                        <TableCell>{p.buildingName || '—'}</TableCell>
                         <TableCell>
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${p.unitType === 'SHOP' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>
+                          <span className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-sm font-medium border border-slate-200 dark:border-slate-700">
+                            {p.buildingName || '—'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold border ${p.unitType === 'SHOP' ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20' : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20'}`}>
+                            <span className={`w-2 h-2 rounded-full mr-2 ${p.unitType === 'SHOP' ? 'bg-indigo-500' : 'bg-blue-500'}`}></span>
                             {p.unitType}
                           </span>
                         </TableCell>
-                        <TableCell className="font-medium">{p.unitName}</TableCell>
                         <TableCell>
-                          <span className={`px-2 py-1 rounded text-xs font-semibold ${p._count?.tenants > 0 ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                            {p._count?.tenants > 0 ? 'Occupied' : 'Vacant'}
+                          <span className="font-semibold text-slate-800 dark:text-slate-100 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 rounded text-sm border border-slate-200 dark:border-slate-700">
+                            {p.unitName}
                           </span>
                         </TableCell>
-                        <TableCell>{p.address}</TableCell>
-                        <TableCell>{p.size ? `${p.size}` : '—'}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold border ${p._count?.tenants > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'}`}>
+                            <span className={`w-2 h-2 rounded-full mr-2 ${p._count?.tenants > 0 ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                            {p._count?.tenants > 0 ? 'OCCUPIED' : 'VACANT'}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                           <span className="px-3 py-1.5 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 rounded text-xs border border-slate-200 dark:border-slate-800 block truncate max-w-[200px]">
+                            {p.address}
+                           </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="px-3 py-1.5 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-700 dark:text-cyan-300 rounded text-sm font-semibold border border-cyan-100 dark:border-cyan-800">
+                            {p.size ? `${p.size}` : '—'}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right">
                           <Button size="sm" variant="outline" onClick={() => { setSelectedProperty(p); setIsDetailsOpen(true); }}>
                             <Eye className="h-4 w-4 mr-2" /> Details
