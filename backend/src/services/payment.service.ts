@@ -8,6 +8,7 @@ interface CreatePaymentInput {
   tenantId: string;
   method: 'CASH' | 'UPI' | 'BANK';
   referenceId?: string;
+  followUpDate?: Date | string | null;
 }
 
 /**
@@ -79,7 +80,10 @@ export const processPayment = async (data: CreatePaymentInput, collectorId: stri
 
     await tx.rent.update({
       where: { id: rent.id },
-      data: { status: newStatus },
+      data: { 
+        status: newStatus,
+        followUpDate: newStatus === RentStatus.PAID ? null : (data.followUpDate ? new Date(data.followUpDate) : undefined),
+      },
     });
 
     return {
@@ -107,7 +111,7 @@ export const getPaymentHistory = async (
       take: limit,
       include: {
         tenant: { select: { id: true, name: true } },
-        rent: { select: { generatedMonth: true, amount: true, status: true } },
+        rent: { select: { generatedMonth: true, amount: true, status: true, followUpDate: true } },
         createdBy: { select: { name: true } },
       },
       orderBy: { paymentDate: 'desc' },

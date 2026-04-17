@@ -120,6 +120,7 @@ model Rent {
   dueDate        DateTime
   status         RentStatus @default(PENDING)
   generatedMonth String     // Format: YYYY-MM
+  followUpDate   DateTime?  // Used when capturing partial payments
   
   // Relations
   tenantId       String

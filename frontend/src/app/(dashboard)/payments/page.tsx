@@ -45,6 +45,7 @@ const paymentSchema = z.object({
   rentId: z.string().min(1, 'Please select a rent month'),
   method: z.enum(['CASH', 'UPI', 'BANK']),
   referenceId: z.string().optional(),
+  followUpDate: z.string().optional(),
 });
 
 type PaymentFormValues = z.infer<typeof paymentSchema>;
@@ -61,11 +62,15 @@ export default function PaymentsPage() {
 
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
-    defaultValues: { amount: 0, tenantId: '', rentId: '', method: 'CASH', referenceId: '' },
+    defaultValues: { amount: 0, tenantId: '', rentId: '', method: 'CASH', referenceId: '', followUpDate: '' },
   });
 
   const selectedTenantId = form.watch('tenantId');
   const selectedRentId = form.watch('rentId');
+  const amount = form.watch('amount');
+  
+  const currentRent = tenantRents.find(r => r.id === selectedRentId);
+  const isPartial = currentRent && Number(amount) > 0 && Number(amount) < Number(currentRent.amount);
 
   // Auto-fill amount when a specific rent is selected
   useEffect(() => {
@@ -152,6 +157,14 @@ export default function PaymentsPage() {
   }, [selectedTenantId, form]);
 
   const onSubmit = async (data: PaymentFormValues) => {
+    const selectedRent = tenantRents.find(r => r.id === data.rentId);
+    if (selectedRent && Number(data.amount) < Number(selectedRent.amount)) {
+      if (!data.followUpDate) {
+        form.setError('followUpDate', { message: 'A follow-up date is required for partial payments.'});
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       await api.post('/payments', data);
@@ -294,11 +307,33 @@ export default function PaymentsPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Reference ID (Optional)</FormLabel>
-                      <FormControl><Input placeholder="UPI Ref / Cheque No" {...field} /></FormControl>
+                      <FormControl><Input placeholder="UPI Ref / Cheque No" {...field} value={field.value || ''} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {isPartial && (
+                  <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-lg p-4 animate-in fade-in slide-in-from-top-2">
+                    <p className="text-sm text-amber-800 dark:text-amber-500 font-medium mb-3">
+                      Partial payment detected. Remaining balance will be ₹{(Number(currentRent.amount) - Number(amount)).toFixed(2)}.
+                    </p>
+                    <FormField
+                      control={form.control}
+                      name="followUpDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-amber-900 dark:text-amber-400">Follow-up Date for Remaining Balance <span className="text-red-500">*</span></FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} value={field.value || ''} className="border-amber-300 dark:border-amber-700/50 focus-visible:ring-amber-500" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+
                 <div className="flex justify-end pt-4">
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Processing...' : 'Record Payment'}
@@ -344,9 +379,16 @@ export default function PaymentsPage() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded text-sm font-medium border border-blue-100 dark:border-blue-800">
-                          {p.rent?.generatedMonth}
-                        </span>
+                        <div className="flex flex-col gap-1 items-start">
+                          <span className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded text-sm font-medium border border-blue-100 dark:border-blue-800">
+                            {p.rent?.generatedMonth}
+                          </span>
+                          {p.rent?.status === 'PARTIAL' && p.rent?.followUpDate && (
+                            <span className="px-2 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded text-xs font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-800">
+                              Follow Up: {new Date(p.rent.followUpDate).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300 rounded text-sm font-medium border border-violet-100 dark:border-violet-800">
