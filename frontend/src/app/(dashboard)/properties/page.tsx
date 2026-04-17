@@ -576,24 +576,33 @@ export default function PropertiesPage() {
                 <div className="border p-4 rounded-lg space-y-2">
                   <h4 className="font-semibold border-b pb-2">Location Information</h4>
                   <p className="text-sm"><span className="text-muted-foreground">Address:</span> {selectedProperty.address}</p>
-                  {selectedProperty.googleLocation && (
+                  {selectedProperty.googleLocation ? (
                     <a href={selectedProperty.googleLocation} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1 text-sm mt-1">
-                      <MapPin className="h-4 w-4" /> Map Link
+                      <MapPin className="h-4 w-4" /> Open in Google Maps
                     </a>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                      <MapPin className="h-4 w-4 opacity-50" /> No map link provided
+                    </p>
                   )}
                 </div>
               </div>
 
-              {selectedProperty.layoutImage && (
+              {selectedProperty.layoutImage ? (
                 <div className="border p-4 rounded-lg">
                   <h4 className="font-semibold border-b pb-2 mb-3">Layout / Floor Plan</h4>
                   <a href={selectedProperty.layoutImage} target="_blank" rel="noopener noreferrer">
                     <img src={selectedProperty.layoutImage} alt="Layout" className="rounded-lg max-h-64 w-full object-cover border hover:opacity-90 transition-opacity" />
                   </a>
                 </div>
+              ) : (
+                <div className="border p-4 rounded-lg bg-muted/20 flex flex-col items-center justify-center py-8">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No layout image provided</p>
+                </div>
               )}
 
-              {selectedProperty.images && selectedProperty.images.length > 0 && (
+              {selectedProperty.images && selectedProperty.images.length > 0 ? (
                 <div className="border p-4 rounded-lg">
                   <h4 className="font-semibold border-b pb-2 mb-3">Property Photos</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -603,6 +612,11 @@ export default function PropertiesPage() {
                       </a>
                     ))}
                   </div>
+                </div>
+              ) : (
+                <div className="border p-4 rounded-lg bg-muted/20 flex flex-col items-center justify-center py-8">
+                  <Images className="h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm text-muted-foreground">No property photos provided</p>
                 </div>
               )}
             </div>
