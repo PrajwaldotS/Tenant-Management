@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Building, Users, CreditCard, Banknote, AlertCircle, Clock } from 'lucide-react';
 import { useAuthStore } from '@/store/auth';
 import { toast } from 'sonner';
+import { DashboardSkeleton } from '@/components/ui/page-skeleton';
 
 import {
   Table,
@@ -91,7 +92,7 @@ export default function DashboardPage() {
   }, [user]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-full">Loading dashboard...</div>;
+    return <DashboardSkeleton />;
   }
 
   // COLLECTOR shouldn't see full dashboard overview, just a welcome

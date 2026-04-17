@@ -37,6 +37,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Printer, CalendarClock } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 
 const paymentSchema = z.object({
   amount: z.coerce.number().min(1, 'Amount must be greater than 0'),
@@ -317,7 +318,7 @@ export default function PaymentsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center p-4">Loading payments...</div>
+            <PageSkeleton />
           ) : (
             <Table>
               <TableHeader>

@@ -38,6 +38,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 
 const tenantSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -268,7 +269,7 @@ export default function TenantsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center p-4">Loading tenants...</div>
+            <PageSkeleton />
           ) : (
             <Table>
               <TableHeader>

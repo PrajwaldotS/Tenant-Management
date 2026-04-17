@@ -38,6 +38,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, MapPin, ImageIcon, Images, Search, Eye } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 
 const propertySchema = z.object({
   buildingName: z.string().optional(),
@@ -503,7 +504,7 @@ export default function PropertiesPage() {
           </div>
 
           {loading ? (
-            <div className="text-center p-4">Loading properties...</div>
+            <PageSkeleton />
           ) : (
             <div className="overflow-x-auto">
               <Table>

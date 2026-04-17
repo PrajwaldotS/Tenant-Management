@@ -39,6 +39,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { PlusCircle } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 
 const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -226,7 +227,7 @@ export default function UsersPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center p-4">Loading users...</div>
+            <PageSkeleton />
           ) : (
             <Table>
               <TableHeader>
