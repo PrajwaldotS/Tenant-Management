@@ -56,6 +56,8 @@ export default function TenantsPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterBuilding, setFilterBuilding] = useState('ALL');
 
   const form = useForm<TenantFormValues>({
     resolver: zodResolver(tenantSchema),
@@ -238,8 +240,31 @@ export default function TenantsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tenant Directory</CardTitle>
-          <CardDescription>View all active tenants and their assigned properties.</CardDescription>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+              <CardTitle>Tenant Directory</CardTitle>
+              <CardDescription>View all active tenants and their assigned properties.</CardDescription>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <Input
+                placeholder="Search tenant or phone..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="max-w-[250px]"
+              />
+              <Select value={filterBuilding} onValueChange={setFilterBuilding}>
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="All Buildings" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Buildings</SelectItem>
+                  {Array.from(new Set(properties.map(p => p.buildingName).filter(Boolean))).map((building: any) => (
+                    <SelectItem key={building} value={building}>{building}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -256,10 +281,19 @@ export default function TenantsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tenants.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center">No tenants found</TableCell></TableRow>
-                ) : (
-                  tenants.map((t) => (
+                {(() => {
+                  const filteredTenants = tenants.filter((tenant) => {
+                    const matchesSearch = tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) || tenant.phone.includes(searchTerm);
+                    const buildingName = tenant.property?.buildingName;
+                    const matchesBuilding = filterBuilding === 'ALL' || buildingName === filterBuilding;
+                    return matchesSearch && matchesBuilding;
+                  });
+
+                  if (filteredTenants.length === 0) {
+                    return <TableRow><TableCell colSpan={5} className="text-center">No tenants found</TableCell></TableRow>;
+                  }
+
+                  return filteredTenants.map((t) => (
                     <TableRow key={t.id}>
                       <TableCell className="font-medium">{t.name}</TableCell>
                       <TableCell>{t.phone}</TableCell>
@@ -267,8 +301,8 @@ export default function TenantsPage() {
                       <TableCell>₹{Number(t.rentAmount).toLocaleString()}</TableCell>
                       <TableCell>{new Date(t.moveInDate).toLocaleDateString()}</TableCell>
                     </TableRow>
-                  ))
-                )}
+                  ));
+                })()}
               </TableBody>
             </Table>
           )}
