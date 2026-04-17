@@ -238,10 +238,10 @@ export default function PropertiesPage() {
                  <PlusCircle className="h-4 w-4" /> Add Property
                </span>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create New Property</DialogTitle>
-                <DialogDescription>Add a new shop or house unit to the system.</DialogDescription>
+                <DialogDescription className="text-base">Add a new shop or house unit to the system.</DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4">
@@ -573,10 +573,10 @@ export default function PropertiesPage() {
 
       {selectedProperty && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl">{selectedProperty.buildingName ? `${selectedProperty.buildingName} › ` : ''}{selectedProperty.unitName}</DialogTitle>
-              <DialogDescription>Detailed view of this property unit.</DialogDescription>
+              <DialogTitle className="text-3xl font-bold">{selectedProperty.buildingName ? `${selectedProperty.buildingName} › ` : ''}{selectedProperty.unitName}</DialogTitle>
+              <DialogDescription className="text-base italic">Detailed architecture and financial profile of this property unit.</DialogDescription>
             </DialogHeader>
             <div className="space-y-6 mt-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

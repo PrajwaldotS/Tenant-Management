@@ -182,11 +182,11 @@ export default function PaymentsPage() {
                  <PlusCircle className="h-4 w-4" /> Record Payment
                </span>
             </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Record New Payment</DialogTitle>
-              <DialogDescription>Apply a payment towards a pending rent.</DialogDescription>
-            </DialogHeader>
+            <DialogContent className="max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Record New Payment</DialogTitle>
+                <DialogDescription className="text-base">Apply a payment towards a pending rent and update the ledger.</DialogDescription>
+              </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4">
                 <FormField
@@ -383,9 +383,12 @@ export default function PaymentsPage() {
 
       {/* Invoice Print Dialog */}
       <Dialog open={!!printPayment} onOpenChange={(open) => !open && setPrintPayment(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogTitle className="sr-only">Print Receipt</DialogTitle>
-          <div id="invoice-print-area" className="p-8 bg-white text-black rounded-lg border border-slate-200 shadow-sm">
+        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
+          <DialogHeader className="border-b pb-4 mb-2">
+            <DialogTitle className="text-3xl font-black tracking-tighter uppercase text-slate-900 dark:text-slate-100 italic">Payment Receipt</DialogTitle>
+            <DialogDescription className="text-base font-semibold text-slate-500">Official transaction record for your files.</DialogDescription>
+          </DialogHeader>
+          <div id="invoice-print-area" className="p-10 bg-white text-black rounded-lg border border-slate-200 shadow-sm mx-auto max-w-3xl">
             <div className="text-center mb-8 border-b-2 border-slate-800 pb-6">
               <h2 className="text-3xl font-extrabold uppercase tracking-widest text-slate-800">Rent Receipt</h2>
               <p className="text-base text-slate-500 mt-2 font-medium">Tenant Management System</p>

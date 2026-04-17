@@ -139,10 +139,10 @@ export default function TenantsPage() {
             <DialogTrigger render={<Button className="gap-2" />}>
                 <PlusCircle className="h-4 w-4" /> Add Tenant
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Add New Tenant</DialogTitle>
-                <DialogDescription>Register a new tenant to a property.</DialogDescription>
+                <DialogDescription className="text-base">Register a new tenant and assign them to a property unit.</DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-4">

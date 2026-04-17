@@ -6,22 +6,66 @@ import { Button } from '@/components/ui/button';
 import { Menu, RefreshCw } from 'lucide-react';
 import { Sidebar } from './sidebar';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useState, useEffect } from 'react';
+
+const BRANDING_STORAGE_KEY = 'app-branding';
+
+interface BrandingData {
+  companyName: string;
+  logoBase64: string | null;
+}
+
+function getBranding(): BrandingData {
+  if (typeof window === 'undefined') return { companyName: 'PropManage', logoBase64: null };
+  try {
+    const stored = localStorage.getItem(BRANDING_STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  } catch {}
+  return { companyName: 'PropManage', logoBase64: null };
+}
 
 export function Navbar() {
   const { user } = useAuthStore();
+  const [branding, setBranding] = useState<BrandingData>({ companyName: 'PropManage', logoBase64: null });
+
+  useEffect(() => {
+    setBranding(getBranding());
+
+    const handleBrandingUpdate = () => setBranding(getBranding());
+    window.addEventListener('branding-updated', handleBrandingUpdate);
+    window.addEventListener('storage', handleBrandingUpdate);
+    return () => {
+      window.removeEventListener('branding-updated', handleBrandingUpdate);
+      window.removeEventListener('storage', handleBrandingUpdate);
+    };
+  }, []);
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 justify-between lg:justify-end">
-      <Sheet>
-        <SheetTrigger render={<Button variant="outline" size="icon" className="shrink-0 lg:hidden" />}>
-            <Menu className="h-5 w-5" />
-            <span className="sr-only">Toggle navigation menu</span>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0">
-          <Sidebar />
-        </SheetContent>
-      </Sheet>
+    <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6 justify-between">
+      {/* Left side: Mobile menu + branding on mobile */}
+      <div className="flex items-center gap-3">
+        <Sheet>
+          <SheetTrigger render={<Button variant="outline" size="icon" className="shrink-0 lg:hidden" />}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle navigation menu</span>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0">
+            <Sidebar />
+          </SheetContent>
+        </Sheet>
+
+        {/* Show branding on mobile (hidden on lg because sidebar shows it) */}
+        <div className="flex items-center gap-2 lg:hidden">
+          {branding.logoBase64 ? (
+            <img src={branding.logoBase64} alt="Logo" className="h-7 w-7 rounded-md object-contain" />
+          ) : null}
+          <span className="font-bold text-sm text-slate-800 dark:text-slate-100 truncate max-w-[150px]">
+            {branding.companyName}
+          </span>
+        </div>
+      </div>
       
+      {/* Right side: Controls */}
       <div className="flex items-center gap-4">
         <ThemeToggle />
         {user && (
