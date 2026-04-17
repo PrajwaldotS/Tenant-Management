@@ -185,9 +185,23 @@ export default function TenantsPage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Assign to Property</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select 
+                          key={`property-select-${properties.length}`}
+                          onValueChange={field.onChange} 
+                          value={field.value}
+                        >
                           <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Select a property" /></SelectTrigger>
+                            <SelectTrigger>
+                              <SelectValue>
+                                {field.value 
+                                  ? (() => {
+                                      const p = properties.find(p => p.id === field.value);
+                                      if (!p) return field.value;
+                                      return p.buildingName ? `${p.buildingName} › ${p.unitName}` : p.unitName;
+                                    })()
+                                  : "Select a property"}
+                              </SelectValue>
+                            </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             {properties.map((p) => (
