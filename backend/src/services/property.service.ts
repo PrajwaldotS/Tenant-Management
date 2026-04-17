@@ -3,12 +3,15 @@ import { AppError } from '../utils/response';
 import { Prisma } from '@prisma/client';
 
 interface CreatePropertyInput {
-  name: string;
+  buildingName?: string | null;
+  unitType: 'SHOP' | 'HOUSE';
+  unitName: string;
   address: string;
   ownerId: string;
   managerId?: string | null;
   size?: string | null;
   layoutImage?: string | null;
+  images?: string[];
   floor?: number | null;
   googleLocation?: string | null;
   meterNo?: string | null;
@@ -17,12 +20,15 @@ interface CreatePropertyInput {
 }
 
 interface UpdatePropertyInput {
-  name?: string;
+  buildingName?: string | null;
+  unitType?: 'SHOP' | 'HOUSE';
+  unitName?: string;
   address?: string;
   managerId?: string | null;
   isActive?: boolean;
   size?: string | null;
   layoutImage?: string | null;
+  images?: string[];
   floor?: number | null;
   googleLocation?: string | null;
   meterNo?: string | null;
@@ -33,7 +39,7 @@ interface UpdatePropertyInput {
 const PROPERTY_INCLUDE = {
   owner: { select: { id: true, name: true, email: true } },
   manager: { select: { id: true, name: true, email: true } },
-  _count: { select: { tenants: true } },
+  _count: { select: { tenants: { where: { isActive: true } } } },
 };
 
 export const createProperty = async (data: CreatePropertyInput) => {
@@ -62,12 +68,15 @@ export const createProperty = async (data: CreatePropertyInput) => {
 
   return prisma.property.create({
     data: {
-      name: data.name,
+      buildingName: data.buildingName || null,
+      unitType: data.unitType,
+      unitName: data.unitName,
       address: data.address,
       ownerId: data.ownerId,
       managerId: data.managerId || null,
       size: data.size || null,
       layoutImage: data.layoutImage || null,
+      images: data.images || [],
       floor: data.floor ?? null,
       googleLocation: data.googleLocation || null,
       meterNo: data.meterNo || null,

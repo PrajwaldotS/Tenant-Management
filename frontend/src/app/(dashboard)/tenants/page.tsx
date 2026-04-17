@@ -191,7 +191,7 @@ export default function TenantsPage() {
                           </FormControl>
                           <SelectContent>
                             {properties.map((p) => (
-                              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                              <SelectItem key={p.id} value={p.id}>{p.buildingName ? `${p.buildingName} › ${p.unitName}` : p.unitName}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
@@ -249,7 +249,7 @@ export default function TenantsPage() {
                     <TableRow key={t.id}>
                       <TableCell className="font-medium">{t.name}</TableCell>
                       <TableCell>{t.phone}</TableCell>
-                      <TableCell>{t.property?.name || 'Unknown'}</TableCell>
+                      <TableCell>{t.property?.buildingName ? `${t.property.buildingName} › ${t.property.unitName}` : (t.property?.unitName || 'Unknown')}</TableCell>
                       <TableCell>₹{Number(t.rentAmount).toLocaleString()}</TableCell>
                       <TableCell>{new Date(t.moveInDate).toLocaleDateString()}</TableCell>
                     </TableRow>

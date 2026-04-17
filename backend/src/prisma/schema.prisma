@@ -31,6 +31,11 @@ enum RentIncrementType {
   AMOUNT
 }
 
+enum UnitType {
+  SHOP
+  HOUSE
+}
+
 model User {
   id           String    @id @default(uuid())
   name         String
@@ -53,14 +58,17 @@ model User {
 }
 
 model Property {
-  id        String   @id @default(uuid())
-  name      String
-  address   String
-  isActive  Boolean  @default(true)
+  id           String   @id @default(uuid())
+  buildingName String?              // Optional building name (e.g. "Sunrise Apartments")
+  unitType     UnitType             // SHOP or HOUSE
+  unitName     String               // Name of the shop/house (e.g. "Shop 101", "Flat A")
+  address      String
+  isActive     Boolean  @default(true)
 
   // Property details
   size              String?             // e.g. "1200 sq ft"
-  layoutImage       String?             // URL to layout image
+  layoutImage       String?             // URL to single layout/floor-plan image
+  images            String[]            // URLs to multiple property photos (Cloudinary)
   floor             Int?
   googleLocation    String?             // Google Maps URL
   meterNo           String?             // Utility meter number

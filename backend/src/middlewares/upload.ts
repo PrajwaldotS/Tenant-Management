@@ -15,7 +15,7 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
+    fileSize: 5 * 1024 * 1024, // 5 MB per file
   },
 });
 
@@ -23,3 +23,14 @@ const upload = multer({
  * Middleware to handle a single file upload for the given field name.
  */
 export const uploadSingle = (fieldName: string) => upload.single(fieldName);
+
+/**
+ * Middleware to handle multiple file fields at once.
+ * - layoutImage: single file (floor plan)
+ * - images: up to 10 property photos
+ */
+export const uploadPropertyFiles = () =>
+  upload.fields([
+    { name: 'layoutImage', maxCount: 1 },
+    { name: 'images', maxCount: 10 },
+  ]);

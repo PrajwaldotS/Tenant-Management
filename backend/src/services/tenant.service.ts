@@ -18,7 +18,7 @@ interface UpdateTenantInput {
 }
 
 const TENANT_INCLUDE = {
-  property: { select: { id: true, name: true, address: true } },
+  property: { select: { id: true, buildingName: true, unitName: true, unitType: true, address: true } },
 };
 
 export const createTenant = async (data: CreateTenantInput) => {

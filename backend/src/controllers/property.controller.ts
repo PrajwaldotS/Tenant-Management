@@ -5,10 +5,21 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { uploadToCloudinary } from '../utils/cloudinary';
 
 export const create = asyncHandler(async (req: Request, res: Response) => {
-  // If an image file was uploaded via multer, upload it to Cloudinary
-  if (req.file) {
-    const { url } = await uploadToCloudinary(req.file.buffer, 'properties');
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+  // Upload single layout image if provided
+  if (files?.layoutImage?.[0]) {
+    const { url } = await uploadToCloudinary(files.layoutImage[0].buffer, 'properties/layouts');
     req.body.layoutImage = url;
+  }
+
+  // Upload multiple property photos if provided
+  if (files?.images && files.images.length > 0) {
+    const uploadPromises = files.images.map((file) =>
+      uploadToCloudinary(file.buffer, 'properties/photos')
+    );
+    const results = await Promise.all(uploadPromises);
+    req.body.images = results.map((r) => r.url);
   }
 
   // Coerce numeric fields that arrive as strings from multipart/form-data
@@ -41,10 +52,25 @@ export const getById = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const update = asyncHandler(async (req: Request, res: Response) => {
-  // If a new image file was uploaded, upload to Cloudinary
-  if (req.file) {
-    const { url } = await uploadToCloudinary(req.file.buffer, 'properties');
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+  // Upload new layout image if provided
+  if (files?.layoutImage?.[0]) {
+    const { url } = await uploadToCloudinary(files.layoutImage[0].buffer, 'properties/layouts');
     req.body.layoutImage = url;
+  }
+
+  // Upload new property photos if provided (appended to existing ones)
+  if (files?.images && files.images.length > 0) {
+    const uploadPromises = files.images.map((file) =>
+      uploadToCloudinary(file.buffer, 'properties/photos')
+    );
+    const results = await Promise.all(uploadPromises);
+    const newImageUrls = results.map((r) => r.url);
+
+    // Get existing images from the property and merge
+    const existingProperty = await propertyService.getPropertyById(req.params.id, req.user!);
+    req.body.images = [...(existingProperty.images || []), ...newImageUrls];
   }
 
   // Coerce numeric fields from multipart/form-data

@@ -2,12 +2,14 @@ import { z } from 'zod';
 
 export const createPropertySchema = z.object({
   body: z.object({
-    name: z.string({ required_error: 'Property name is required' }).min(2, 'Name must be at least 2 characters').trim(),
+    buildingName: z.string().trim().optional().nullable(),
+    unitType: z.enum(['SHOP', 'HOUSE'], { required_error: 'Unit type is required (SHOP or HOUSE)' }),
+    unitName: z.string({ required_error: 'Unit name is required' }).min(1, 'Unit name is required').trim(),
     address: z.string({ required_error: 'Address is required' }).min(5, 'Address must be at least 5 characters').trim(),
     ownerId: z.string({ required_error: 'Owner ID is required' }).uuid('Invalid Owner ID format'),
     managerId: z.string().uuid('Invalid Manager ID format').optional().nullable(),
     size: z.string().trim().optional().nullable(),
-    // layoutImage is handled by multer file upload, not JSON body
+    // layoutImage & images are handled by multer file upload, not JSON body
     floor: z.coerce.number().int('Floor must be a whole number').optional().nullable(),
     googleLocation: z.string().url('Invalid Google Maps URL').optional().nullable().or(z.literal('')),
     meterNo: z.string().trim().optional().nullable(),
@@ -18,12 +20,14 @@ export const createPropertySchema = z.object({
 
 export const updatePropertySchema = z.object({
   body: z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters').trim().optional(),
+    buildingName: z.string().trim().optional().nullable(),
+    unitType: z.enum(['SHOP', 'HOUSE']).optional(),
+    unitName: z.string().min(1, 'Unit name is required').trim().optional(),
     address: z.string().min(5, 'Address must be at least 5 characters').trim().optional(),
     managerId: z.string().uuid('Invalid Manager ID format').optional().nullable(),
     isActive: z.boolean().optional(),
     size: z.string().trim().optional().nullable(),
-    // layoutImage is handled by multer file upload, not JSON body
+    // layoutImage & images are handled by multer file upload, not JSON body
     floor: z.coerce.number().int('Floor must be a whole number').optional().nullable(),
     googleLocation: z.string().url('Invalid Google Maps URL').optional().nullable().or(z.literal('')),
     meterNo: z.string().trim().optional().nullable(),
